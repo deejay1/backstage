@@ -29,4 +29,11 @@ export interface ConnectionsService {
       : never;
     authMethods: readonly [TAuthMethod, ...TAuthMethod[]];
   }): Promise<Connection<TType, TAuthMethod>>;
+
+  find<TType extends ConnectionTypeKey>(options: {
+    type: TType;
+    query: LookupConnectionType<TType> extends ConnectionType<infer IDefinition>
+      ? IDefinition['query']
+      : never;
+  }): Promise<Omit<Connection<TType>, 'auth'>>;
 }

@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-import { ComponentType } from 'react';
+import { ComponentType, createElement } from 'react';
 import {
   AppNode,
+  ExtensionBoundary,
   IconComponent,
   IconElement,
   RouteRef,
-} from '@backstage/frontend-plugin-api';
-import {
   createExtensionBlueprint,
   createExtensionDataRef,
 } from '@backstage/frontend-plugin-api';
@@ -128,6 +127,7 @@ const componentDataRef = createExtensionDataRef<NavContentComponent>().with({
 
 /**
  * Creates an extension that replaces the entire nav bar with your own component. This blueprint is limited to use by the app plugin.
+ * Errors thrown by the supplied component are reported through the app error API.
  *
  * @public
  */
@@ -138,7 +138,14 @@ export const NavContentBlueprint = createExtensionBlueprint({
   dataRefs: {
     component: componentDataRef,
   },
-  *factory(params: { component: NavContentComponent }) {
-    yield componentDataRef(params.component);
+  *factory(params: { component: NavContentComponent }, { node }) {
+    const Component = params.component;
+    yield componentDataRef(props =>
+      createElement(ExtensionBoundary, {
+        node,
+        errorPresentation: 'error-api',
+        children: createElement(Component, props),
+      }),
+    );
   },
 });

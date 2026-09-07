@@ -16,11 +16,15 @@
 
 import { screen, waitFor, within } from '@testing-library/react';
 import { renderTestApp } from '@backstage/frontend-test-utils';
+import { NavContentBlueprint } from '@backstage/plugin-app-react';
 import {
   PageBlueprint,
   createExtension,
+  createFrontendModule,
   createRouteRef,
+  errorApiRef,
 } from '@backstage/frontend-plugin-api';
+import { withLogCollector } from '@backstage/test-utils';
 import { legacyNavItemTargetDataRef } from './legacyNavItem';
 
 const DEFAULT_CONFIG = {
@@ -88,5 +92,57 @@ describe('AppNav', () => {
         within(screen.getByRole('navigation')).getByText('Legacy Nav Title'),
       ).toBeInTheDocument();
     });
+  });
+
+  it('should isolate errors thrown by custom nav content', async () => {
+    const throwingNavModule = createFrontendModule({
+      pluginId: 'app',
+      extensions: [
+        NavContentBlueprint.make({
+          params: {
+            component: () => {
+              throw new Error('nav content failed');
+            },
+          },
+        }),
+      ],
+    });
+    const page = PageBlueprint.make({
+      name: 'content',
+      params: {
+        path: '/content',
+        loader: async () => <div>Page content</div>,
+      },
+    });
+    const errorApi = {
+      post: jest.fn(),
+      error$: jest.fn(),
+    };
+
+    const { error } = await withLogCollector(['error'], async () => {
+      renderTestApp({
+        extensions: [page],
+        features: [throwingNavModule],
+        apis: [[errorApiRef, errorApi]],
+        config: DEFAULT_CONFIG,
+        initialRouteEntries: ['/content'],
+      });
+
+      expect(await screen.findByText('Page content')).toBeInTheDocument();
+      expect(screen.queryByText('nav content failed')).not.toBeInTheDocument();
+    });
+
+    expect(errorApi.post).toHaveBeenCalledWith(
+      expect.objectContaining({
+        message: expect.stringContaining('nav content failed'),
+      }),
+    );
+    expect(error).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          message: expect.stringContaining('nav content failed'),
+        }),
+      ]),
+    );
   });
 });

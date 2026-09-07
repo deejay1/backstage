@@ -154,11 +154,12 @@ describe('NavContentBlueprint', () => {
     });
 
     const tester = createExtensionTester(extension);
+    const Component = tester.get(NavContentBlueprint.dataRefs.component);
 
-    expect(
-      tester.get(NavContentBlueprint.dataRefs.component)({
-        navItems: mockNavItems([]),
-        items: [
+    render(
+      <Component
+        navItems={mockNavItems([])}
+        items={[
           {
             to: '/',
             text: 'Home',
@@ -166,17 +167,13 @@ describe('NavContentBlueprint', () => {
             icon: () => null,
             routeRef,
           },
-        ],
-      }),
-    ).toEqual(
-      <div>
-        Items:
-        {[
-          <a key={0} href="/">
-            Home
-          </a>,
         ]}
-      </div>,
+      />,
+    );
+
+    expect(screen.getByRole('link', { name: 'Home' })).toHaveAttribute(
+      'href',
+      '/',
     );
   });
 
@@ -221,26 +218,21 @@ describe('NavContentBlueprint', () => {
     });
 
     const tester = createExtensionTester(extension);
+    const Component = tester.get(NavContentBlueprint.dataRefs.component);
 
-    expect(
-      tester.get(NavContentBlueprint.dataRefs.component)({
-        navItems: mockNavItems(items),
-        items: [],
-      }),
-    ).toEqual(
-      <div>
-        {[
-          <a key="page:home" href="/">
-            Home
-          </a>,
-          <a key="page:catalog" href="/catalog">
-            Catalog
-          </a>,
-          <a key="page:docs" href="/docs">
-            Docs
-          </a>,
-        ]}
-      </div>,
+    render(<Component navItems={mockNavItems(items)} items={[]} />);
+
+    expect(screen.getByRole('link', { name: 'Home' })).toHaveAttribute(
+      'href',
+      '/',
+    );
+    expect(screen.getByRole('link', { name: 'Catalog' })).toHaveAttribute(
+      'href',
+      '/catalog',
+    );
+    expect(screen.getByRole('link', { name: 'Docs' })).toHaveAttribute(
+      'href',
+      '/docs',
     );
   });
 

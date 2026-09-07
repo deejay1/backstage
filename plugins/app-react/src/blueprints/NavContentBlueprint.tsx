@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { ComponentType, createElement } from 'react';
+import { ComponentType } from 'react';
 import {
   AppNode,
   ExtensionBoundary,
@@ -139,12 +139,10 @@ export const NavContentBlueprint = createExtensionBlueprint({
   },
   *factory(params: { component: NavContentComponent }, { node }) {
     const Component = params.component;
-    yield componentDataRef(props =>
-      createElement(ExtensionBoundary, {
-        node,
-        errorPresentation: 'error-api',
-        children: createElement(Component, props),
-      }),
-    );
+    yield componentDataRef(props => (
+      <ExtensionBoundary node={node} errorPresentation="error-api">
+        <Component {...props} />
+      </ExtensionBoundary>
+    ));
   },
 });

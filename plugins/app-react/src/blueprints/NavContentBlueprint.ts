@@ -127,7 +127,6 @@ const componentDataRef = createExtensionDataRef<NavContentComponent>().with({
 
 /**
  * Creates an extension that replaces the entire nav bar with your own component. This blueprint is limited to use by the app plugin.
- * Errors thrown by the supplied component are reported through the app error API.
  *
  * @public
  */

@@ -26,14 +26,14 @@ import type { ConnectionTypeKey, LookupConnectionType } from '../definitions';
 export type Connection<
   T extends ConnectionType | ConnectionTypeKey = ConnectionType,
   TAuthMethod extends string = string,
-> = LookupConnectionType<T> extends ConnectionType<infer TDefinition>
+> = LookupConnectionType<T> extends ConnectionType<infer IDefinition>
   ? {
       type: LookupConnectionType<T>['type'];
       title: string;
       auth: string extends TAuthMethod
-        ? ConnectionAuthValue<TDefinition['auth'][number]>[]
+        ? ConnectionAuthValue<IDefinition['auth'][number]>[]
         : Extract<
-            ConnectionAuthValue<TDefinition['auth'][number]>,
+            ConnectionAuthValue<IDefinition['auth'][number]>,
             { method: TAuthMethod }
           >;
     } & ReturnType<LookupConnectionType<T>['configSchema']['parse']>

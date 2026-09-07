@@ -24,8 +24,8 @@ export interface ConnectionsService {
     TAuthMethod extends ConnectionAuthMethodKey<TType>,
   >(options: {
     type: TType;
-    query: LookupConnectionType<TType> extends ConnectionType<infer TDefinition>
-      ? TDefinition['query']
+    query: LookupConnectionType<TType> extends ConnectionType<infer IDefinition>
+      ? IDefinition['query']
       : never;
     authMethods: readonly [TAuthMethod, ...TAuthMethod[]];
   }): Promise<Connection<TType, TAuthMethod>>;

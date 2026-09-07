@@ -50,14 +50,14 @@ export type ConfiguredConnectionAuth<M> = M extends {
 export type Connection<
   T extends ConnectionType | ConnectionTypeKey = ConnectionType,
   TAuthMethod extends string = string,
-> = LookupConnectionType<T> extends ConnectionType<infer TDefinition>
+> = LookupConnectionType<T> extends ConnectionType<infer IDefinition>
   ? {
       type: LookupConnectionType<T>['type'];
       title: string;
       auth: string extends TAuthMethod
-        ? ConnectionAuthValue<TDefinition['auth'][number]>[]
+        ? ConnectionAuthValue<IDefinition['auth'][number]>[]
         : Extract<
-            ConnectionAuthValue<TDefinition['auth'][number]>,
+            ConnectionAuthValue<IDefinition['auth'][number]>,
             {
               method: TAuthMethod;
             }
@@ -96,8 +96,8 @@ export interface ConnectionsService {
     TAuthMethod extends ConnectionAuthMethodKey<TType>,
   >(options: {
     type: TType;
-    query: LookupConnectionType<TType> extends ConnectionType<infer TDefinition>
-      ? TDefinition['query']
+    query: LookupConnectionType<TType> extends ConnectionType<infer IDefinition>
+      ? IDefinition['query']
       : never;
     authMethods: readonly [TAuthMethod, ...TAuthMethod[]];
   }): Promise<Connection<TType, TAuthMethod>>;
